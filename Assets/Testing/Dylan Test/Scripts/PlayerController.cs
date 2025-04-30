@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isGrounded && !isOnSlope && !isJumping)
         {
-            rigidBody.linearVelocity = new Vector2(moveValue.x * moveSpeedX, rigidBody.linearVelocityY);
+            rigidBody.linearVelocity = new Vector2(moveValue.x * moveSpeedX, 0);
         }
         else if (isGrounded && isOnSlope && !isJumping && canWalkOnSlope)
         {
@@ -137,7 +137,7 @@ public class PlayerController : MonoBehaviour
             Debug.DrawRay(hit.point, hit.normal, Color.green);
         }
 
-        if(slopeDownAngle > maxSlopeAngle)
+        if(slopeDownAngle > maxSlopeAngle || slopeSideAngle > maxSlopeAngle)
         {
             canWalkOnSlope = false;
         }
@@ -174,5 +174,14 @@ public class PlayerController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Hit");
+        if (collision.gameObject.tag == "Item")
+        {
+            Destroy(collision.gameObject);
+        }
     }
 }
