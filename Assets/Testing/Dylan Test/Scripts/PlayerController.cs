@@ -20,11 +20,13 @@ public class PlayerController : MonoBehaviour
     public float groundCheckRadius;
     public LayerMask groundLayer;
     public Transform groundCheck;
+    bool wasGrounded;
     bool isGrounded;
 
     // Jump Variables
     bool canJump;
     bool isJumping;
+    bool hasDoubleJumped = false;
 
     // Slope Checks
     public float slopeCheckDistanceY;
@@ -59,22 +61,30 @@ public class PlayerController : MonoBehaviour
         CheckGround();
         SlopeCheck();
         MoveCharacter();
-        
-        if(jumpAction.WasPerformedThisFrame() && canJump)
+
+        bool jumpedThisFrame = false;
+
+        if(jumpAction.WasPerformedThisFrame() && canJump )
         {
             rigidBody.linearVelocityY = jumpSpeed;
             isJumping = true;
             canJump = false;
+            jumpedThisFrame = true;
+            Debug.Log("jumping");
         }
-
-        
+        if(jumpAction.WasPerformedThisFrame() && !hasDoubleJumped && !isGrounded && !jumpedThisFrame)
+        {
+            rigidBody.linearVelocityY = jumpSpeed;
+            hasDoubleJumped = true;
+            Debug.Log("double jumping");
+        }
     }
 
     void MoveCharacter()
     {
         if (isGrounded && !isOnSlope && !isJumping)
         {
-            rigidBody.linearVelocity = new Vector2(moveValue.x * moveSpeedX, 0);
+            rigidBody.linearVelocity = new Vector2(moveValue.x * moveSpeedX, rigidBody.linearVelocityY);
         }
         else if (isGrounded && isOnSlope && !isJumping && canWalkOnSlope)
         {
@@ -137,7 +147,7 @@ public class PlayerController : MonoBehaviour
             Debug.DrawRay(hit.point, hit.normal, Color.green);
         }
 
-        if(slopeDownAngle > maxSlopeAngle || slopeSideAngle > maxSlopeAngle)
+        if(slopeDownAngle > maxSlopeAngle)
         {
             canWalkOnSlope = false;
         }
@@ -158,9 +168,11 @@ public class PlayerController : MonoBehaviour
 
     public void CheckGround()
     {
+        wasGrounded = isGrounded;
+
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        if (rigidBody.linearVelocityY <= 0.0f)
+        if (!wasGrounded && isGrounded)
         {
             isJumping = false;
         }
@@ -168,6 +180,11 @@ public class PlayerController : MonoBehaviour
         if(isGrounded && !isJumping && slopeDownAngle <= maxSlopeAngle)
         {
             canJump = true;
+            hasDoubleJumped = false;
+        }
+        else
+        {
+            canJump = false;
         }
     }
 

@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1277923454914840151}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.35, z: 0}
+  m_LocalPosition: {x: 0, y: -0.4, z: 0}
   m_LocalScale: {x: 1, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -299,14 +299,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37c583726b894fa43af31c6468ffd999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundCheckRadius: 0.5
+  groundCheckRadius: 0.45
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   groundCheck: {fileID: 3798496171554543653}
   slopeCheckDistanceY: 0.6
   slopeCheckDistanceX: 0.6
-  maxSlopeAngle: 40
+  maxSlopeAngle: 50
   noFriction: {fileID: 6200000, guid: ec5d36aa3471ba642927fc9a86bb3f3f, type: 2}
   fullFriction: {fileID: 6200000, guid: 1ef1a5d95521e1b4eb5c1d03fd8951a0, type: 2}
 --- !u!70 &8479352629571348041

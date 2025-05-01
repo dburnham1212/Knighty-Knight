@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,25 +13,31 @@ public class PlayerController2 : MonoBehaviour
     public Rigidbody2D.SlideMovement SlideMovement;
     public Rigidbody2D.SlideResults SlideResults;
 
+    LayerMask groundMask;
+
     public float moveSpeed = 5f;
-    float jumpSpeed = 5f;
+    float jumpSpeed = 7.5f;
+
+    bool isJumping;
 
     private Rigidbody2D m_Rigidbody;
 
-    public LayerMask groundLayer;
+    public bool prevDynamicRigidBody;
 
-    public bool wasGrounded;
-    public bool isGrounded;
+    bool isGrounded;
+
+    public bool performedThisFrame;
+
     public Transform groundCheck;
     public float groundCheckRadius = .5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        groundMask = LayerMask.GetMask("Ground");
 
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
-
 
         m_Rigidbody = GetComponent<Rigidbody2D>();
     }
@@ -40,19 +48,65 @@ public class PlayerController2 : MonoBehaviour
         // Calculate the horizontal velocity from keyboard input.
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
 
-        Vector2 velocity = new Vector2(moveValue.x * moveSpeed, 0f);
+        performedThisFrame = false;
 
         CheckGround();
 
-        SlideResults = m_Rigidbody.Slide(velocity, Time.deltaTime, SlideMovement);
+        if(jumpAction.WasPressedThisFrame() && !isJumping)
+        {
+            isJumping = true;
+            m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
+            m_Rigidbody.linearVelocityY = jumpSpeed;
+            performedThisFrame = true;
+        }
 
+        if (!isJumping)
+        {
+            Vector2 velocity = new Vector2(moveValue.x * moveSpeed, 0.0f);
+
+            float currentSlopeAngle = Math.Abs(Vector2.Angle(SlideResults.surfaceHit.normal, Vector2.up));
+
+            if(currentSlopeAngle > SlideMovement.gravitySlipAngle)
+            {
+                // We are sliding
+                velocity = Vector2.zero;
+            }
+
+            SlideResults = m_Rigidbody.Slide(velocity, Time.deltaTime, SlideMovement);
+
+            if(!SlideMovement.useSimulationMove)
+            {
+                SlideMovement.useSimulationMove = true;
+            }
+        }
+        else
+        {
+            m_Rigidbody.linearVelocityX = moveValue.x * moveSpeed;
+        }
     }
 
-    public void CheckGround()
+    private void CheckGround()
     {
-        wasGrounded = isGrounded;
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
 
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        if(!isGrounded)
+        {
+            m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (isGrounded && !performedThisFrame)
+        {
+            if (isJumping)
+            {
+                isJumping = false;
+            }
+            m_Rigidbody.linearVelocity = Vector2.zero;
+            m_Rigidbody.bodyType = RigidbodyType2D.Kinematic;
+            SlideMovement.useSimulationMove = false;
+        }
     }
 
     private void OnDrawGizmos()
