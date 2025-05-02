@@ -5,11 +5,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.Rigidbody2D;
 
-public class PlayerController2 : MonoBehaviour
+public class PlayerController2Copy : MonoBehaviour
 {
     InputAction moveAction;
     InputAction jumpAction;
-
+    
     public Rigidbody2D.SlideMovement SlideMovement;
     public Rigidbody2D.SlideResults SlideResults;
 
@@ -31,9 +31,6 @@ public class PlayerController2 : MonoBehaviour
     public Transform groundCheck;
     public float groundCheckRadius = .5f;
 
-    Vector2 previousPosition;
-    int stuckCount;
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -43,9 +40,6 @@ public class PlayerController2 : MonoBehaviour
         jumpAction = InputSystem.actions.FindAction("Jump");
 
         m_Rigidbody = GetComponent<Rigidbody2D>();
-
-        previousPosition = transform.position;
-        stuckCount = 0;
     }
 
     // Update is called once per frame
@@ -76,21 +70,6 @@ public class PlayerController2 : MonoBehaviour
             {
                 // We are sliding
                 velocity = Vector2.zero;
-
-                if (previousPosition == (Vector2)transform.position)
-                {
-                    stuckCount++;
-
-                    if (stuckCount > 1)
-                    {
-                        velocity = new Vector2(moveValue.x * moveSpeed, 0.0f);
-                        stuckCount = 0;
-                    }
-                }
-                else if (stuckCount > 0)
-                {
-                    stuckCount = 0;
-                }
             }
 
             SlideResults = m_Rigidbody.Slide(velocity, Time.deltaTime, SlideMovement);
@@ -104,8 +83,6 @@ public class PlayerController2 : MonoBehaviour
         {
             m_Rigidbody.linearVelocityX = moveValue.x * moveSpeed;
         }
-
-        previousPosition = transform.position;
     }
 
     private void CheckGround()
