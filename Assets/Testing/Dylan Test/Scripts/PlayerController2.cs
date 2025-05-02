@@ -15,6 +15,8 @@ public class PlayerController2 : MonoBehaviour
 
     LayerMask groundMask;
 
+    SpriteRenderer spriteRenderer;
+
     public float moveSpeed = 5f;
     float jumpSpeed = 7.5f;
 
@@ -31,6 +33,9 @@ public class PlayerController2 : MonoBehaviour
     public Transform groundCheck;
     public float groundCheckRadius = .5f;
 
+    public Vector2 boxSize;
+    public float castDistance;
+
     Vector2 previousPosition;
     int stuckCount;
 
@@ -46,6 +51,8 @@ public class PlayerController2 : MonoBehaviour
 
         previousPosition = transform.position;
         stuckCount = 0;
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -65,11 +72,22 @@ public class PlayerController2 : MonoBehaviour
             m_Rigidbody.linearVelocityY = jumpSpeed;
             performedThisFrame = true;
         }
+        
+        if(moveValue.x > 0.0f)
+        {
+            spriteRenderer.flipX = false;
+        }
+        else if(moveValue.x < 0.0f)
+        {
+            spriteRenderer.flipX = true;
+        }
+
 
         if (!isJumping)
         {
             Vector2 velocity = new Vector2(moveValue.x * moveSpeed, 0.0f);
 
+            
             float currentSlopeAngle = Math.Abs(Vector2.Angle(SlideResults.surfaceHit.normal, Vector2.up));
 
             if(currentSlopeAngle > SlideMovement.gravitySlipAngle)
@@ -110,7 +128,7 @@ public class PlayerController2 : MonoBehaviour
 
     private void CheckGround()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+        isGrounded = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundMask);
 
         if(!isGrounded)
         {
@@ -134,7 +152,7 @@ public class PlayerController2 : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
