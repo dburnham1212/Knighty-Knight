@@ -333,58 +333,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -0.35
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 7188198613990069920, guid: c1cb7139c7976404ca358437568c79b3, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2845875672314528007, guid: c1cb7139c7976404ca358437568c79b3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1072824599}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c1cb7139c7976404ca358437568c79b3, type: 3}
---- !u!1 &1072824598 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2845875672314528007, guid: c1cb7139c7976404ca358437568c79b3, type: 3}
-  m_PrefabInstance: {fileID: 1072824597}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1072824599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1072824598}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab9cc1a07e53925449dc3478033b4665, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SlideMovement:
-    <maxIterations>k__BackingField: 0
-    <surfaceSlideAngle>k__BackingField: 0
-    <gravitySlipAngle>k__BackingField: 0
-    <surfaceUp>k__BackingField: {x: 0, y: 0}
-    <surfaceAnchor>k__BackingField: {x: 0, y: 0}
-    <gravity>k__BackingField: {x: 0, y: 0}
-    <startPosition>k__BackingField: {x: 0, y: 0}
-    <selectedCollider>k__BackingField: {fileID: 0}
-    <layerMask>k__BackingField:
-      serializedVersion: 2
-      m_Bits: 0
-    <useLayerMask>k__BackingField: 0
-    <useStartPosition>k__BackingField: 0
-    <useNoMove>k__BackingField: 0
-    <useSimulationMove>k__BackingField: 0
-    <useAttachedTriggers>k__BackingField: 0
-  SlideResults:
-    <remainingVelocity>k__BackingField: {x: 0, y: 0}
-    <position>k__BackingField: {x: 0, y: 0}
-    <iterationsUsed>k__BackingField: 0
-  moveSpeed: 5
-  prevDynamicRigidBody: 0
-  performedThisFrame: 0
-  groundCheck: {fileID: 0}
-  groundCheckRadius: 0.5
 --- !u!1 &1974041679
 GameObject:
   m_ObjectHideFlags: 0
