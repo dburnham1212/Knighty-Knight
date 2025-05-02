@@ -3,8 +3,8 @@ using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
-
-public class PlayerController : MonoBehaviour
+// old script, not in use
+public class PlayerControllerOld : MonoBehaviour
 {
     InputAction moveAction;
     InputAction jumpAction;
