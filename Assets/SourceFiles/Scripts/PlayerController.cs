@@ -19,10 +19,10 @@ public class PlayerController : MonoBehaviour
     bool isGrounded;
     bool isJumping;
     bool jumpedThisFrame;
-    // Platform checks
+    // platform checks
     bool isOnPlatform;
     // static RigidBody struct for sliding
-    SlideResults SlideResults;
+    SlideResults slideResults;
     // slide stick fix
     Vector2 previousPosition;
     int stuckCount;
@@ -35,7 +35,10 @@ public class PlayerController : MonoBehaviour
     public Vector2 boxSize;
     public float castDistance;
     // static RigidBody struct for sliding
-    public SlideMovement SlideMovement;
+    public SlideMovement slideMovement;
+
+    // properties
+    public bool DropAction {  get; set; }
 
     // Unity Messages
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -53,28 +56,27 @@ public class PlayerController : MonoBehaviour
 
         previousPosition = transform.position;
         stuckCount = 0;
+
+        // initialize properties
+        DropAction = false;
     }
 
     // FixedUpdate is called once per fixed-frame
     void FixedUpdate()
     {
+        jumpedThisFrame = false;
         // gets the input from moveAction
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
-        /*
-         * Direction Grid
-         * (-0.71,  0.71) (0.00,  1.00) (0.71,  0.71)
-         * (-1.00,  0.00) (0.00,  0.00) (1.00,  0.00)
-         * (-0.71, -0.71) (0.00, -1.00) (0.71, -0.71)
-         */
-        // wanna move this down, so it's only called if it's true
-        jumpedThisFrame = false;
 
         CheckGround();
         CheckPlatform();
         FlipSprite(moveValue.x);
 
         if (jumpAction.WasPressedThisFrame() && !isJumping)
-            Jump();
+            if (moveValue.y >= 0)
+                Jump();
+            else
+                DropAction = true;
 
         HorizontalMovement(moveValue.x);
 
@@ -90,7 +92,7 @@ public class PlayerController : MonoBehaviour
 
             m_Rigidbody.linearVelocity = Vector2.zero;
             m_Rigidbody.bodyType = RigidbodyType2D.Kinematic;
-            SlideMovement.useSimulationMove = false;
+            slideMovement.useSimulationMove = false;
         }
         
     }
@@ -98,12 +100,8 @@ public class PlayerController : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (isOnPlatform)
-        {
             if(isJumping)
-            {
                 isJumping = false;
-            }
-        }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -153,9 +151,9 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 velocity = new Vector2(moveValueX * moveSpeed, 0.0f);
 
-            float currentSlopeAngle = Math.Abs(Vector2.Angle(SlideResults.surfaceHit.normal, Vector2.up));
+            float currentSlopeAngle = Math.Abs(Vector2.Angle(slideResults.surfaceHit.normal, Vector2.up));
 
-            if (currentSlopeAngle > SlideMovement.gravitySlipAngle)
+            if (currentSlopeAngle > slideMovement.gravitySlipAngle)
             {
                 // We are sliding
                 velocity = Vector2.zero;
@@ -171,21 +169,15 @@ public class PlayerController : MonoBehaviour
                     }
                 }
                 else if (stuckCount > 0)
-                {
                     stuckCount = 0;
-                }
             }
 
-            SlideResults = m_Rigidbody.Slide(velocity, Time.deltaTime, SlideMovement);
+            slideResults = m_Rigidbody.Slide(velocity, Time.deltaTime, slideMovement);
 
-            if (!SlideMovement.useSimulationMove)
-            {
-                SlideMovement.useSimulationMove = true;
-            }
+            if (!slideMovement.useSimulationMove)
+                slideMovement.useSimulationMove = true;
         }
         else
-        {
             m_Rigidbody.linearVelocityX = moveValueX * moveSpeed;
-        }
     }
 }
