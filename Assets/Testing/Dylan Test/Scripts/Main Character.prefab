@@ -179,8 +179,8 @@ GameObject:
   - component: {fileID: 8137612716351415490}
   - component: {fileID: 8339129547194839873}
   - component: {fileID: 8697775641276427004}
-  - component: {fileID: 5557386997492082142}
   - component: {fileID: 8479352629571348041}
+  - component: {fileID: -3084116086328611520}
   m_Layer: 0
   m_Name: Main Character
   m_TagString: Untagged
@@ -287,28 +287,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &5557386997492082142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7859468215875707156}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37c583726b894fa43af31c6468ffd999, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  groundCheckRadius: 0.45
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  groundCheck: {fileID: 3798496171554543653}
-  slopeCheckDistanceY: 0.6
-  slopeCheckDistanceX: 0.6
-  maxSlopeAngle: 50
-  noFriction: {fileID: 6200000, guid: ec5d36aa3471ba642927fc9a86bb3f3f, type: 2}
-  fullFriction: {fileID: 6200000, guid: 1ef1a5d95521e1b4eb5c1d03fd8951a0, type: 2}
 --- !u!70 &8479352629571348041
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -346,3 +324,17 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 1}
   m_Direction: 0
+--- !u!114 &-3084116086328611520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7859468215875707156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cadb2258e2458e64883e2f9f19092dbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  horizontalRayCount: 4
+  verticalRayCount: 4
