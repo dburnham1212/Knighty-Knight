@@ -121,28 +121,34 @@ public class MovingPlatform : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        collision.transform.SetParent(transform);
-        if(platformType == PlatformType.Reactive)
+        if(collision.CompareTag("Player"))
         {
-            reactiveMoving = true;
-            reactiveLagTimeCounter = 0.0f;
-            isOnPlatform = true;
-            isAtSpawn = false;
-        }
-        if (platformType == PlatformType.ReactiveTwoWay)
-        {
-            reactiveMoving = true;
+            collision.transform.SetParent(transform);
+            if(platformType == PlatformType.Reactive)
+            {
+                reactiveMoving = true;
+                reactiveLagTimeCounter = 0.0f;
+                isOnPlatform = true;
+                isAtSpawn = false;
+            }
+            if (platformType == PlatformType.ReactiveTwoWay)
+            {
+                reactiveMoving = true;
+            }
         }
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        collision.transform.SetParent(null);
-        if(platformType == PlatformType.Reactive)
+        if(collision.CompareTag("Player"))
         {
-            isOnPlatform = false;
+            collision.transform.SetParent(null);
+            if(platformType == PlatformType.Reactive)
+            {
+                isOnPlatform = false;
+            }
         }
     }
 
