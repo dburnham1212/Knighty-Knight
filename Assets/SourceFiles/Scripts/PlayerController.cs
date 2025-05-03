@@ -14,10 +14,13 @@ public class PlayerController : MonoBehaviour
     InputAction jumpAction;
     // Layers
     LayerMask groundMask;
+    LayerMask platformMask;
     // ground and jump checks
     bool isGrounded;
     bool isJumping;
     bool jumpedThisFrame;
+    // Platform checks
+    bool isOnPlatform;
     // static RigidBody struct for sliding
     SlideResults SlideResults;
     // slide stick fix
@@ -29,8 +32,6 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed;
     public float jumpSpeed;
     // ground check
-    public Transform groundCheck;
-    public float groundCheckRadius;
     public Vector2 boxSize;
     public float castDistance;
     // static RigidBody struct for sliding
@@ -48,6 +49,7 @@ public class PlayerController : MonoBehaviour
         jumpAction = InputSystem.actions.FindAction("Jump");
 
         groundMask = LayerMask.GetMask("Ground");
+        platformMask = LayerMask.GetMask("Platform");
 
         previousPosition = transform.position;
         stuckCount = 0;
@@ -68,6 +70,7 @@ public class PlayerController : MonoBehaviour
         jumpedThisFrame = false;
 
         CheckGround();
+        CheckPlatform();
         FlipSprite(moveValue.x);
 
         if (jumpAction.WasPressedThisFrame() && !isJumping)
@@ -89,12 +92,22 @@ public class PlayerController : MonoBehaviour
             m_Rigidbody.bodyType = RigidbodyType2D.Kinematic;
             SlideMovement.useSimulationMove = false;
         }
+        
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isOnPlatform)
+        {
+            if(isJumping)
+            {
+                isJumping = false;
+            }
+        }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        print("Hit");
-
         if (collision.gameObject.tag == "Item")
             Destroy(collision.gameObject);
     }
@@ -111,6 +124,11 @@ public class PlayerController : MonoBehaviour
 
         if(!isGrounded)
             m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
+    }
+
+    void CheckPlatform()
+    {
+        isOnPlatform = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, platformMask);   
     }
 
     void FlipSprite(float moveValueX)
@@ -131,10 +149,9 @@ public class PlayerController : MonoBehaviour
 
     void HorizontalMovement(float moveValueX)
     {
-        if (!isJumping)
+        if (!isJumping && !isOnPlatform)
         {
             Vector2 velocity = new Vector2(moveValueX * moveSpeed, 0.0f);
-
 
             float currentSlopeAngle = Math.Abs(Vector2.Angle(SlideResults.surfaceHit.normal, Vector2.up));
 

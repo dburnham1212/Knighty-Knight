@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Main Character2 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 7859468215875707156, guid: 735a2e0871243614184780a149621012, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 8137612716351415490, guid: 735a2e0871243614184780a149621012, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.5
@@ -111,61 +115,22 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 5557386997492082142, guid: 735a2e0871243614184780a149621012, type: 3}
     - {fileID: 8479352629571348041, guid: 735a2e0871243614184780a149621012, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1277923454914840151, guid: 735a2e0871243614184780a149621012, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7859468215875707156, guid: 735a2e0871243614184780a149621012, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7188198613990069920}
+      addedObject: {fileID: 3720743144202719801}
     - targetCorrespondingSourceObject: {fileID: 7859468215875707156, guid: 735a2e0871243614184780a149621012, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3720743144202719801}
+      addedObject: {fileID: 7692494724636844518}
   m_SourcePrefab: {fileID: 100100000, guid: 735a2e0871243614184780a149621012, type: 3}
 --- !u!1 &2845875672314528007 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7859468215875707156, guid: 735a2e0871243614184780a149621012, type: 3}
   m_PrefabInstance: {fileID: 5362912408556101651}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7188198613990069920
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2845875672314528007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2c313c8b1f77154ebec563ca3010ee7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SlideMovement:
-    <maxIterations>k__BackingField: 3
-    <surfaceSlideAngle>k__BackingField: 40
-    <gravitySlipAngle>k__BackingField: 40
-    <surfaceUp>k__BackingField: {x: 0, y: 1}
-    <surfaceAnchor>k__BackingField: {x: 0, y: -1}
-    <gravity>k__BackingField: {x: 0, y: -7}
-    <startPosition>k__BackingField: {x: 0, y: 0}
-    <selectedCollider>k__BackingField: {fileID: 0}
-    <layerMask>k__BackingField:
-      serializedVersion: 2
-      m_Bits: 64
-    <useLayerMask>k__BackingField: 0
-    <useStartPosition>k__BackingField: 0
-    <useNoMove>k__BackingField: 0
-    <useSimulationMove>k__BackingField: 0
-    <useAttachedTriggers>k__BackingField: 0
-  SlideResults:
-    <remainingVelocity>k__BackingField: {x: 0, y: 0}
-    <position>k__BackingField: {x: 0, y: 0}
-    <iterationsUsed>k__BackingField: 0
-  moveSpeed: 5
-  prevDynamicRigidBody: 0
-  performedThisFrame: 0
-  groundCheck: {fileID: 9140649521405360182}
-  groundCheckRadius: 0.475
-  boxSize: {x: 1.15, y: 0.2}
-  castDistance: 0.7
 --- !u!61 &3720743144202719801
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -212,8 +177,36 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.78, y: 0.91}
   m_EdgeRadius: 0
---- !u!4 &9140649521405360182 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3798496171554543653, guid: 735a2e0871243614184780a149621012, type: 3}
-  m_PrefabInstance: {fileID: 5362912408556101651}
+--- !u!114 &7692494724636844518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2845875672314528007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7623cdf8190ef549a02ab2ffde712a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  jumpSpeed: 7.5
+  boxSize: {x: 1.14, y: 0.1}
+  castDistance: 0.7
+  SlideMovement:
+    <maxIterations>k__BackingField: 3
+    <surfaceSlideAngle>k__BackingField: 40
+    <gravitySlipAngle>k__BackingField: 40
+    <surfaceUp>k__BackingField: {x: 0, y: 1}
+    <surfaceAnchor>k__BackingField: {x: 0, y: -1}
+    <gravity>k__BackingField: {x: 0, y: -7}
+    <startPosition>k__BackingField: {x: 0, y: 0}
+    <selectedCollider>k__BackingField: {fileID: 3720743144202719801}
+    <layerMask>k__BackingField:
+      serializedVersion: 2
+      m_Bits: 64
+    <useLayerMask>k__BackingField: 0
+    <useStartPosition>k__BackingField: 0
+    <useNoMove>k__BackingField: 0
+    <useSimulationMove>k__BackingField: 0
+    <useAttachedTriggers>k__BackingField: 0

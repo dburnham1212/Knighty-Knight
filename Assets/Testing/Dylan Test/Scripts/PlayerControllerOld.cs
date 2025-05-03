@@ -17,9 +17,10 @@ public class PlayerControllerOld : MonoBehaviour
     Vector2 moveValue;
 
     // Ground Checks
-    public float groundCheckRadius;
     public LayerMask groundLayer;
     public Transform groundCheck;
+    public Vector2 boxSize;
+    public float castDistance;
     bool wasGrounded;
     bool isGrounded;
 
@@ -170,7 +171,7 @@ public class PlayerControllerOld : MonoBehaviour
     {
         wasGrounded = isGrounded;
 
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        isGrounded = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundLayer);
 
         if (!wasGrounded && isGrounded)
         {
@@ -190,7 +191,7 @@ public class PlayerControllerOld : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
