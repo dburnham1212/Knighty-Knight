@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.Rigidbody2D;
@@ -9,12 +11,15 @@ public class PlayerController : MonoBehaviour
     // Components
     SpriteRenderer spriteRenderer;
     Rigidbody2D m_Rigidbody;
+    Animator animator;
     // InputActions
     InputAction moveAction;
     InputAction jumpAction;
+    InputAction attackAction;
     // Layers
     LayerMask groundMask;
     LayerMask platformMask;
+    LayerMask enemyMask; // just use water until enemy mask exists
     // ground and jump checks
     bool isGrounded;
     bool isJumping;
@@ -26,6 +31,12 @@ public class PlayerController : MonoBehaviour
     // slide stick fix
     Vector2 previousPosition;
     int stuckCount;
+    // attack stuff
+    Collider2D[] enemies;
+    List<Collider2D> hitEnemies;
+    Vector2 attackPosition;
+    float attackRadius;
+    int attackIterator;
 
     // public members
     // movement
@@ -38,7 +49,7 @@ public class PlayerController : MonoBehaviour
     public SlideMovement slideMovement;
 
     // properties
-    public bool DropAction {  get; set; }
+    public bool DropAction { get; set; }
     public Inventory Inventory { get; private set; }
 
     // Unity Messages
@@ -48,12 +59,15 @@ public class PlayerController : MonoBehaviour
         // initialize required private members
         m_Rigidbody = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
 
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
+        attackAction = InputSystem.actions.FindAction("Attack");
 
         groundMask = LayerMask.GetMask("Ground");
         platformMask = LayerMask.GetMask("Platform");
+        enemyMask = LayerMask.GetMask("Water");
 
         previousPosition = transform.position;
         stuckCount = 0;
@@ -72,13 +86,20 @@ public class PlayerController : MonoBehaviour
 
         CheckGround();
         CheckPlatform();
-        FlipSprite(moveValue.x);
 
-        if (jumpAction.WasPressedThisFrame() && !isJumping)
-            if (moveValue.y >= 0)
-                Jump();
-            else
-                DropAction = true;
+        if (!animator.GetBool("isAttacking"))
+        {
+            FlipSprite(moveValue.x);
+
+            if (jumpAction.WasPressedThisFrame() && !isJumping)
+                if (moveValue.y >= 0)
+                    Jump();
+                else
+                    DropAction = true;
+
+            if (attackAction.WasPressedThisFrame())
+                animator.SetBool("isAttacking", true);
+        }
 
         HorizontalMovement(moveValue.x);
 
@@ -96,13 +117,13 @@ public class PlayerController : MonoBehaviour
             m_Rigidbody.bodyType = RigidbodyType2D.Kinematic;
             slideMovement.useSimulationMove = false;
         }
-        
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (isOnPlatform)
-            if(isJumping)
+            if (isJumping)
                 isJumping = false;
     }
 
@@ -149,6 +170,7 @@ public class PlayerController : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
+        Gizmos.DrawWireSphere(attackPosition, attackRadius);
     }
 
     // methods
@@ -156,13 +178,13 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundMask);
 
-        if(!isGrounded)
+        if (!isGrounded)
             m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
     }
 
     void CheckPlatform()
     {
-        isOnPlatform = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, platformMask);   
+        isOnPlatform = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, platformMask);
     }
 
     void FlipSprite(float moveValueX)
@@ -215,5 +237,70 @@ public class PlayerController : MonoBehaviour
         }
         else
             m_Rigidbody.linearVelocityX = moveValueX * moveSpeed;
+    }
+
+    // animation events
+    public void AttackStart()
+    {
+        attackIterator = 0;
+        hitEnemies = new List<Collider2D>();
+    }
+
+    public void Attack()
+    {
+        attackPosition.x = !spriteRenderer.flipX ?
+            transform.position.x + transform.localScale.x / 2 :
+            transform.position.x - transform.localScale.x / 2;
+
+        switch (attackIterator)
+        {
+            case 1:
+                attackPosition.y = transform.position.y + transform.localScale.y / 2 * 4 / 6;
+                break;
+            case 2:
+                attackPosition.y = transform.position.y - transform.localScale.y / 2 * 2 / 6;
+                break;
+            case 3:
+                attackPosition.y = transform.position.y - transform.localScale.y / 2 * 4 / 6;
+                break;
+            default:
+                attackRadius = 0.25f;
+                attackPosition.y = transform.position.y + transform.localScale.y / 2 * 4 / 6;
+                break;
+        }
+
+        enemies = Physics2D.OverlapCircleAll(attackPosition, attackRadius, enemyMask);
+        foreach (Collider2D enemy in enemies)
+        {
+            EnemyScript enemyScript = enemy.GetComponent<EnemyScript>();
+
+            if (enemyScript.CanBeHit)
+            {
+                enemyScript.Health -= 3;
+
+                if (enemyScript.Health > 0)
+                {
+                    hitEnemies.Add(enemy);
+                    enemyScript.CanBeHit = false;
+                }
+                else
+                    Destroy(enemy.gameObject);
+            }
+        }
+
+        attackIterator++;
+    }
+
+    public void AttackEnd()
+    {
+        for (int index = 0; index < hitEnemies.Count; index++)
+        {
+            EnemyScript enemyScript = hitEnemies[index].GetComponent<EnemyScript>();
+            enemyScript.CanBeHit = true;
+            hitEnemies.Remove(hitEnemies[index]);
+        }
+
+        attackRadius = 0;
+        animator.SetBool("isAttacking", false);
     }
 }
