@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
 
     // properties
     public bool DropAction {  get; set; }
+    public Inventory Inventory { get; private set; }
 
     // Unity Messages
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -59,6 +60,7 @@ public class PlayerController : MonoBehaviour
 
         // initialize properties
         DropAction = false;
+        Inventory = new Inventory();
     }
 
     // FixedUpdate is called once per fixed-frame
@@ -107,7 +109,41 @@ public class PlayerController : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Item")
+        {
+            Item item = collision.gameObject.GetComponent<Item>();
+            int index = (int)item.itemName;
+            print(index);
+
+            switch (item.type)
+            {
+                case Inventory.Type.Consumable:
+                    index -= Inventory.KEY_ITEMS;
+                    print(index);
+
+                    if (index >= 0 && index < Inventory.CONSUMABLES)
+                        Inventory.Consumables[index].Add(item.count);
+                    else
+                        print("type and name mismatch");
+                    break;
+                case Inventory.Type.Upgrade:
+                    index -= Inventory.KEY_ITEMS;
+                    print(index);
+
+                    if (index >= 0 && index < Inventory.CONSUMABLES)
+                        Inventory.Consumables[index].Upgrade();
+                    else
+                        print("type and name mismatch");
+                    break;
+                default:
+                    if (index >= 0 && index < Inventory.KEY_ITEMS)
+                        Inventory.KeyItems[index].Upgrade();
+                    else
+                        print("type and name mismatch");
+                    break;
+            }
+
             Destroy(collision.gameObject);
+        }
     }
 
     void OnDrawGizmos()
