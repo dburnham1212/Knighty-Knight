@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2062190171902393675}
   - component: {fileID: 6802127271819431511}
   - component: {fileID: 559328646678197926}
-  - component: {fileID: 4605473348449973696}
   - component: {fileID: -7594035022699704811}
+  - component: {fileID: 4605473348449973696}
   m_Layer: 4
   m_Name: Enemy
   m_TagString: Untagged
@@ -164,41 +164,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.78, y: 0.91}
   m_EdgeRadius: 0
---- !u!114 &4605473348449973696
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3869171558740117286}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d3fb0d55d65de84d8a182e3b8f5bee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  maxHealth: 10
-  moveSpeed: 5
-  jumpSpeed: 7.5
-  boxSize: {x: 1.15, y: 0.2}
-  castDistance: 0.7
-  slideMovement:
-    <maxIterations>k__BackingField: 3
-    <surfaceSlideAngle>k__BackingField: 40
-    <gravitySlipAngle>k__BackingField: 40
-    <surfaceUp>k__BackingField: {x: 0, y: 1}
-    <surfaceAnchor>k__BackingField: {x: 0, y: -1}
-    <gravity>k__BackingField: {x: 0, y: -7}
-    <startPosition>k__BackingField: {x: 0, y: 0}
-    <selectedCollider>k__BackingField: {fileID: 559328646678197926}
-    <layerMask>k__BackingField:
-      serializedVersion: 2
-      m_Bits: 64
-    <useLayerMask>k__BackingField: 0
-    <useStartPosition>k__BackingField: 0
-    <useNoMove>k__BackingField: 0
-    <useSimulationMove>k__BackingField: 0
-    <useAttachedTriggers>k__BackingField: 0
 --- !u!95 &-7594035022699704811
 Animator:
   serializedVersion: 7
@@ -221,3 +186,36 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4605473348449973696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3869171558740117286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d3fb0d55d65de84d8a182e3b8f5bee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  jumpSpeed: 7.5
+  slideMovement:
+    <maxIterations>k__BackingField: 3
+    <surfaceSlideAngle>k__BackingField: 40
+    <gravitySlipAngle>k__BackingField: 40
+    <surfaceUp>k__BackingField: {x: 0, y: 1}
+    <surfaceAnchor>k__BackingField: {x: 0, y: -1}
+    <gravity>k__BackingField: {x: 0, y: -7}
+    <startPosition>k__BackingField: {x: 0, y: 0}
+    <selectedCollider>k__BackingField: {fileID: 559328646678197926}
+    <layerMask>k__BackingField:
+      serializedVersion: 2
+      m_Bits: 64
+    <useLayerMask>k__BackingField: 0
+    <useStartPosition>k__BackingField: 0
+    <useNoMove>k__BackingField: 0
+    <useSimulationMove>k__BackingField: 0
+    <useAttachedTriggers>k__BackingField: 0
+  player: {fileID: 0}
+  maxHealth: 10
