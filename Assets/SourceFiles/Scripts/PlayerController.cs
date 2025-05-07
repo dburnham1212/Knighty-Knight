@@ -1,16 +1,23 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.Rigidbody2D;
 
 public class PlayerController : MonoBehaviour
 {
+    // public members
+    // movement
+    public float moveSpeed;
+    public float jumpSpeed;
+    // static RigidBody struct for sliding
+    public SlideMovement slideMovement;
+
     // private members
     // Components
     SpriteRenderer spriteRenderer;
     Rigidbody2D m_Rigidbody;
+    BoxCollider2D boxCollider;
     Animator animator;
     // InputActions
     InputAction moveAction;
@@ -20,12 +27,16 @@ public class PlayerController : MonoBehaviour
     LayerMask groundMask;
     LayerMask platformMask;
     LayerMask enemyMask; // just use water until enemy mask exists
-    // ground and jump checks
+    // state checks
+    // ground / platform
+    Vector2 boxSize;
+    float castDistance;
     bool isGrounded;
+    bool isOnPlatform;
+    int layerWait;
+    // jumping
     bool isJumping;
     bool jumpedThisFrame;
-    // platform checks
-    bool isOnPlatform;
     // static RigidBody struct for sliding
     SlideResults slideResults;
     // slide stick fix
@@ -38,27 +49,18 @@ public class PlayerController : MonoBehaviour
     float attackRadius;
     int attackIterator;
 
-    // public members
-    // movement
-    public float moveSpeed;
-    public float jumpSpeed;
-    // ground check
-    public Vector2 boxSize;
-    public float castDistance;
-    // static RigidBody struct for sliding
-    public SlideMovement slideMovement;
-
     // properties
     public bool DropAction { get; set; }
     public Inventory Inventory { get; private set; }
 
     // Unity Messages
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         // initialize required private members
-        m_Rigidbody = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        m_Rigidbody = GetComponent<Rigidbody2D>();
+        boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
 
         moveAction = InputSystem.actions.FindAction("Move");
@@ -69,16 +71,25 @@ public class PlayerController : MonoBehaviour
         platformMask = LayerMask.GetMask("Platform");
         enemyMask = LayerMask.GetMask("Water");
 
+        castDistance = 0.4f;
+        boxSize = new Vector2(boxCollider.size.x * transform.localScale.x, castDistance / 2);
+        layerWait = 0;
+
         previousPosition = transform.position;
         stuckCount = 0;
 
         // initialize properties
         DropAction = false;
         Inventory = new Inventory();
+
+        m_Rigidbody.excludeLayers += platformMask;
+        m_Rigidbody.excludeLayers += enemyMask;
+
+        print(m_Rigidbody.excludeLayers.value);
     }
 
     // FixedUpdate is called once per fixed-frame
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         jumpedThisFrame = false;
         // gets the input from moveAction
@@ -86,16 +97,38 @@ public class PlayerController : MonoBehaviour
 
         CheckGround();
         CheckPlatform();
+        if (m_Rigidbody.linearVelocity.y < 0 && !isOnPlatform && layerWait == 0)
+        {
+            if (Physics2D.BoxCast(new Vector2(
+            transform.position.x, transform.position.y - boxCollider.size.y * transform.localScale.y / 2 + castDistance / 2),
+            boxSize, 0, -transform.up, castDistance * 1.5f, platformMask))
+            {
+                m_Rigidbody.excludeLayers -= platformMask;
+                layerWait = 1;
+            }
+        }
+        if (layerWait > 0 && layerWait < 20)
+            layerWait++;
+        else
+            layerWait = 0;
 
         if (!animator.GetBool("isAttacking"))
         {
             FlipSprite(moveValue.x);
 
             if (jumpAction.WasPressedThisFrame() && !isJumping)
-                if (moveValue.y >= 0)
+            {
+                isJumping = true;
+
+                if (isOnPlatform)
+                {
+                    m_Rigidbody.excludeLayers += platformMask;
+                    layerWait = 1;
+                }
+
+                if (!isOnPlatform || moveValue.y >= 0)
                     Jump();
-                else
-                    DropAction = true;
+            }
 
             if (attackAction.WasPressedThisFrame())
                 animator.SetBool("isAttacking", true);
@@ -106,7 +139,18 @@ public class PlayerController : MonoBehaviour
         previousPosition = transform.position;
     }
 
-    void OnCollisionStay2D(Collision2D collision)
+    private void Update()
+    {
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isOnPlatform)
+            if (isJumping)
+                isJumping = false;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
     {
         if (isGrounded && !jumpedThisFrame)
         {
@@ -117,17 +161,15 @@ public class PlayerController : MonoBehaviour
             m_Rigidbody.bodyType = RigidbodyType2D.Kinematic;
             slideMovement.useSimulationMove = false;
         }
-
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionExit2D(Collision2D collision)
     {
-        if (isOnPlatform)
-            if (isJumping)
-                isJumping = false;
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Platform") && !jumpAction.WasPressedThisFrame() && !isOnPlatform)
+            m_Rigidbody.excludeLayers += platformMask;
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Item")
         {
@@ -167,16 +209,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
+        if (boxCollider != null)
+            Gizmos.DrawWireCube(new Vector2 (transform.position.x, transform.position.y - boxCollider.size.y * transform.localScale.y / 2), boxSize);
+        
         Gizmos.DrawWireSphere(attackPosition, attackRadius);
     }
 
     // methods
     void CheckGround()
     {
-        isGrounded = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundMask);
+        isGrounded = Physics2D.BoxCast(new Vector2(transform.position.x,
+            boxCollider.bounds.min.y + castDistance / 2),
+            boxSize, 0, -transform.up, castDistance, groundMask);
 
         if (!isGrounded)
             m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
@@ -184,7 +230,9 @@ public class PlayerController : MonoBehaviour
 
     void CheckPlatform()
     {
-        isOnPlatform = Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, platformMask);
+        isOnPlatform = Physics2D.BoxCast(new Vector2(
+            transform.position.x, transform.position.y - boxCollider.size.y * transform.localScale.y / 2 + castDistance / 2),
+            boxSize, 0, -transform.up, castDistance, platformMask);
     }
 
     void FlipSprite(float moveValueX)
@@ -197,7 +245,6 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
-        isJumping = true;
         m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
         m_Rigidbody.linearVelocityY = jumpSpeed;
         jumpedThisFrame = true;
