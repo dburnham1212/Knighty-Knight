@@ -48,7 +48,7 @@ public class PlayerController : CharacterScript
         {
             FlipSprite();
 
-            if (jumpAction.WasPressedThisFrame() && !IsJumping)
+            if (jumpAction.WasPressedThisFrame() && !IsJumping && CanJump())
             {
                 if (IsOnPlatform)
                     LeavePlatform();
