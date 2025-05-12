@@ -11,6 +11,8 @@ public class CharacterScript : MonoBehaviour
     // static RigidBody struct for sliding
     public SlideMovement slideMovement;
 
+    Vector2 OldPosition;
+
     // properties
     // private set accessor
     // Components
@@ -32,6 +34,7 @@ public class CharacterScript : MonoBehaviour
     // movement
     public Vector2 MoveValue { get; set; }
     // ground / platform
+    public bool WasGrounded { get; set; }
     public bool IsGrounded { get; set; }
     public int StuckCount { get; set; }
     // platform
@@ -42,6 +45,8 @@ public class CharacterScript : MonoBehaviour
     public bool JumpedThisFrame { get; set; }
     // position compare
     public Vector2 PreviousPosition { get; set; }
+
+    float CurrentSlopeAngle { get; set; }
 
     // methods
     public void Initialize()
@@ -77,13 +82,32 @@ public class CharacterScript : MonoBehaviour
             LayerWait = 0;
     }
 
+    public bool CanJump()
+    {
+        bool jumpAllowed = false;
+
+        if (IsGrounded)
+        {
+            if (CurrentSlopeAngle <= slideMovement.gravitySlipAngle)
+                jumpAllowed = true;
+            else if (OldPosition.y == Rigidbody.position.y)
+                jumpAllowed = true;
+        }
+        else if (IsOnPlatform)
+            jumpAllowed = true;
+
+        return jumpAllowed;
+    }
+
     public void CheckGround()
     {
+        WasGrounded = IsGrounded;
+
         IsGrounded = Physics2D.BoxCast(new Vector2(transform.position.x,
             BoxCollider.bounds.min.y + CastDistance / 2),
             BoxSize, 0, -transform.up, CastDistance, GroundMask);
 
-        if (!IsGrounded)
+        if (!IsGrounded && WasGrounded)
             Rigidbody.bodyType = RigidbodyType2D.Dynamic;
     }
 
@@ -129,13 +153,13 @@ public class CharacterScript : MonoBehaviour
 
     public void HorizontalMovement()
     {
-        if (!IsJumping && !IsOnPlatform)
+        if (!IsJumping && !IsOnPlatform && IsGrounded)
         {
             Vector2 velocity = new Vector2(MoveValue.x * moveSpeed, 0.0f);
 
-            float currentSlopeAngle = Math.Abs(Vector2.Angle(SlideResults.surfaceHit.normal, Vector2.up));
+            CurrentSlopeAngle = Math.Abs(Vector2.Angle(SlideResults.surfaceHit.normal, Vector2.up));
 
-            if (currentSlopeAngle > slideMovement.gravitySlipAngle)
+            if (CurrentSlopeAngle > slideMovement.gravitySlipAngle)
             {
                 // We are sliding
                 velocity = Vector2.zero;
@@ -153,6 +177,8 @@ public class CharacterScript : MonoBehaviour
                 else if (StuckCount > 0)
                     StuckCount = 0;
             }
+
+            OldPosition = Rigidbody.position;
 
             SlideResults = Rigidbody.Slide(velocity, Time.deltaTime, slideMovement);
 
